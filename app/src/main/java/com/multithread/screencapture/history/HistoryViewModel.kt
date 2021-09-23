@@ -10,6 +10,7 @@ import com.multithread.screencapture.history.data.repository.ImageRepository
 import com.multithread.screencapture.history.model.ImageDataModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -69,10 +70,14 @@ class HistoryViewModel @Inject constructor(
         _imageHistoryLiveData.value = filteredList
     }
 
-    fun deleteItem(id: Long?) {
-        if (id != null) {
+    fun deleteItem(imageObj: ImageDataModel?) {
+        if (imageObj != null) {
             viewModelScope.launch {
-                imageRepository.deleteHistoryById(id)
+                imageRepository.deleteHistoryById(imageObj.id!!)
+                val file = File(imageObj.imagePath)
+                if (file.exists()) {
+                    file.delete()
+                }
                 onDeleteEvent.value = true
             }
         }

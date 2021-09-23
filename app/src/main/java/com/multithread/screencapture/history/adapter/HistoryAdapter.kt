@@ -43,7 +43,7 @@ class HistoryAdapter(
 
     override fun onDeleteClick(vararg data: Any) {
         val item = data[0] as ImageDataModel
-        viewModel?.deleteItem(item.id)
+        viewModel?.deleteItem(item)
     }
 
 

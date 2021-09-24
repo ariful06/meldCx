@@ -3,6 +3,7 @@ package com.multithread.screencapture.history
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -39,6 +40,11 @@ class HistoryActivity : AppCompatActivity() {
     private fun initObserver() {
         historyViewModel.imageHistoryLiveData.observe(this, {
             if (historyViewModel.imageHistoryLiveData.value != null) {
+                historyViewModel.isEmpty.value = historyViewModel.imageHistoryLiveData.value.isNullOrEmpty()
+                if (historyViewModel.isEmpty.value == true)
+                    binding.tvEmptyView.visibility = View.VISIBLE
+                else
+                    binding.tvEmptyView.visibility = View.GONE
                 mAdapter.replaceData(historyViewModel.imageHistoryLiveData.value)
             }
         })

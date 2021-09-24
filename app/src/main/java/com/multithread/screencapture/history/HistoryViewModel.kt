@@ -26,6 +26,7 @@ class HistoryViewModel @Inject constructor(
     private var completeList: MutableList<ImageDataModel> = ArrayList<ImageDataModel>()
     var searchText = MutableLiveData<String>()
     var onDeleteEvent = MutableLiveData<Boolean>(false)
+    var isEmpty = MutableLiveData<Boolean>(false)
     var onItemClickEvent = MutableLiveData<ImageDataModel>()
 
     fun getAllImageList() {

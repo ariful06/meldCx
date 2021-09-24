@@ -6,4 +6,5 @@
     <string name="label_search_here">Search Here</string>
     <string name="hints_date_format">DD-MM-YY</string>
     <string name="hint_please_enter_the_url">Please Enter the Url</string>
+    <string name="label_no_data_found">No Data Found</string>
 </resources>

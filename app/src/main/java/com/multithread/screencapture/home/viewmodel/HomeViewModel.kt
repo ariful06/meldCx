@@ -1,6 +1,5 @@
 package com.multithread.screencapture.home.viewmodel
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Picture
@@ -14,18 +13,14 @@ import com.multithread.screencapture.history.model.ImageDataModel
 import com.multithread.screencapture.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.lang.Exception
 import java.util.*
 import javax.inject.Inject
-import kotlin.coroutines.coroutineContext
-import kotlin.coroutines.suspendCoroutine
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    val imageRepository: ImageRepository
+    private val imageRepository: ImageRepository
 ) : ViewModel() {
 
     val isLoading = MutableLiveData<Boolean>(false)

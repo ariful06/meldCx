@@ -26,6 +26,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
+import android.R
+import com.multithread.screencapture.utils.Constants.URL_PREFIX
+import com.multithread.screencapture.utils.Constants.URL_PREFIX_SECURE
 
 
 @AndroidEntryPoint
@@ -79,6 +82,10 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
             if (!binding.etUrl.text.toString().isNullOrEmpty()) {
                 mViewModel.isLoading.value = true
                 url = binding.etUrl.text.toString().trim()
+                if (!url.startsWith(URL_PREFIX_SECURE) || !url.startsWith(URL_PREFIX)){
+                    url = "$URL_PREFIX_SECURE$url"
+                    binding.etUrl.setText(url)
+                }
                 startWebView(url)
             } else
                 Toast.makeText(this, "Please enter an url first", Toast.LENGTH_LONG).show()
@@ -132,7 +139,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
                 if (mViewModel.isLoading.value == true) {
                     mViewModel.isLoading.value = false
                 }
-                Log.e("Webview Error", "description:${description}")
+                Log.e("WebView Error", "description:${description}")
             }
         }
         binding.webView.loadUrl(url)
@@ -144,19 +151,19 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults)
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
-
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
         Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
+        Log.d("Snapshot", "onPermissionsGranted:" + requestCode + ":" + perms.size);
         val picture: Picture = binding.webView.capturePicture()
         mViewModel.getSnapshot(picture, url)
     }
 
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+        Log.d("Snapshot", "onPermissionsDenied:" + requestCode + ":" + perms.size);
         if (EasyPermissions.somePermissionDenied(this, perms.first())) {
             AppSettingsDialog.Builder(this).build().show()
         } else
@@ -168,15 +175,23 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
             )
     }
 
-
-    //    val screenShotDirectory = File("${sdCard.absoluteFile}${Constants.FOLDER_NAME}")
-//    screenShotDirectory.mkdir()
-//    val fileName = screenShotDirectory.toString() + "${url}-${dateTime}-${System.currentTimeMillis()}.jpg"
     override fun onRationaleAccepted(requestCode: Int) {
-
+        Log.d("SnapShot", "onRationaleAccepted:$requestCode");
     }
 
     override fun onRationaleDenied(requestCode: Int) {
-
+        Log.d("SnapShot", "onRationaleDenied:$requestCode");
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
+            Toast.makeText(this, "Write permission from settings", Toast.LENGTH_LONG).show()
+        }
+        if (requestCode == REQUEST_EXTERNAL_STORAGE) {
+            Toast.makeText(this, "Write permission", Toast.LENGTH_LONG).show()
+        }
+    }
+
+
 }

@@ -25,13 +25,10 @@ public class SplashScreenActivity extends AppCompatActivity {
         img = findViewById(R.id.image);
         img.startAnimation(zoom);
         Handler h = new Handler();
-        h.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(i);
-                finish();
-            }
+        h.postDelayed(() -> {
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(i);
+            finish();
         },3000);
     }
 }

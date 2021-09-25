@@ -20,15 +20,37 @@ import com.multithread.screencapture.databinding.ActivityMainBinding
 import com.multithread.screencapture.history.HistoryActivity
 import com.multithread.screencapture.history.model.ImageDataModel
 import com.multithread.screencapture.home.viewmodel.HomeViewModel
-import com.multithread.screencapture.utils.Constants
-import com.multithread.screencapture.utils.PermissionCheckManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import android.R
+import android.R.attr
+import android.content.ContentValues
+import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import com.multithread.screencapture.utils.Constants.URL_PREFIX
 import com.multithread.screencapture.utils.Constants.URL_PREFIX_SECURE
+import java.io.File
+import java.io.IOException
+import java.io.OutputStream
+import java.util.*
+import android.media.MediaScannerConnection
+
+import android.content.ContentResolver
+import android.content.Context
+import android.database.Cursor
+import android.graphics.Canvas
+
+import androidx.annotation.NonNull
+import android.graphics.BitmapFactory
+
+import android.os.ParcelFileDescriptor
+import java.io.FileDescriptor
+import android.R.attr.data
+import com.multithread.screencapture.utils.*
 
 
 @AndroidEntryPoint
@@ -60,7 +82,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
         if (intent.hasExtra(Constants.INTENT_DATA)) {
             imageObj = intent.extras?.get(Constants.INTENT_DATA) as ImageDataModel
             binding.etUrl.setText(imageObj.title)
-            startWebView(imageObj.title)
+            mViewModel.imageTitle.value = imageObj.title
+            binding.webView.loadUrlToWebView(mViewModel.imageTitle.value!!,this,mViewModel.imageBitmap,mViewModel.isLoading)
         }
     }
 
@@ -86,15 +109,20 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
                     url = "$URL_PREFIX_SECURE$url"
                     binding.etUrl.setText(url)
                 }
-                startWebView(url)
+                mViewModel.imageTitle.value = url
+                binding.webView.loadUrlToWebView(mViewModel.imageTitle.value!!,this,mViewModel.imageBitmap,mViewModel.isLoading)
             } else
                 Toast.makeText(this, "Please enter an url first", Toast.LENGTH_LONG).show()
         }
         binding.btnCapture.setOnClickListener {
             if (!binding.etUrl.text.toString().isNullOrEmpty()) {
                 if (PermissionCheckManager.hasExternalStorageWritePermission(this)) {
-                    val picture: Picture = binding.webView.capturePicture()
-                    mViewModel.getSnapshot(picture, url)
+                    mViewModel.actualImagePath.value = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+                        ImageStoreUtils.getRealPath(this,mViewModel.imageBitmap.value,mViewModel.getImageFileName())
+                    }else{
+                        ImageStoreUtils.getRealPath(mViewModel.imageBitmap.value,mViewModel.getImageFileName())
+                    }
+                    mViewModel.saveImage()
                 } else
                     EasyPermissions.requestPermissions(
                         this,
@@ -111,55 +139,21 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
         }
     }
 
-    private fun startWebView(url: String) {
-        val settings: WebSettings = binding.webView.settings
-        binding.webView.scrollBarStyle = View.SCROLLBARS_OUTSIDE_OVERLAY
-        settings.useWideViewPort = true
-        settings.javaScriptEnabled = true
-        settings.loadWithOverviewMode = true
-        mViewModel.isLoading.value = true
-        binding.webView.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                view.loadUrl(url)
-                return true
-            }
-
-            override fun onPageFinished(view: WebView, url: String) {
-                if (mViewModel.isLoading.value == true) {
-                    mViewModel.isLoading.value = false
-                }
-            }
-
-            override fun onReceivedError(
-                view: WebView,
-                errorCode: Int,
-                description: String,
-                failingUrl: String
-            ) {
-                if (mViewModel.isLoading.value == true) {
-                    mViewModel.isLoading.value = false
-                }
-                Log.e("WebView Error", "description:${description}")
-            }
-        }
-        binding.webView.loadUrl(url)
-
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
         Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
-        Log.d("Snapshot", "onPermissionsGranted:" + requestCode + ":" + perms.size);
-        val picture: Picture = binding.webView.capturePicture()
-        mViewModel.getSnapshot(picture, url)
+        Log.d("Snapshot", "onPermissionsGranted:" + requestCode + ":" + perms.size)
+        mViewModel.actualImagePath.value = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+             ImageStoreUtils.getRealPath(this,mViewModel.imageBitmap.value,mViewModel.getImageFileName())
+        }else{
+           ImageStoreUtils.getRealPath(mViewModel.imageBitmap.value,mViewModel.getImageFileName())
+        }
+        mViewModel.saveImage()
+
     }
 
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
@@ -192,6 +186,5 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
             Toast.makeText(this, "Write permission", Toast.LENGTH_LONG).show()
         }
     }
-
 
 }

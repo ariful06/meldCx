@@ -1,32 +1,17 @@
 package com.multithread.screencapture.home.viewmodel
 
-import android.app.Application
 import android.content.Context
-import android.database.Cursor
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Picture
-import android.net.Uri
-import android.os.Environment
-import android.util.Log
-import android.view.View
-import android.webkit.WebView
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.multithread.screencapture.history.data.repository.ImageRepository
 import com.multithread.screencapture.history.model.ImageDataModel
-import com.multithread.screencapture.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
 import java.util.*
 import javax.inject.Inject
-import android.provider.MediaStore
-import dagger.hilt.android.internal.Contexts.getApplication
-import dagger.hilt.android.qualifiers.ApplicationContext
 
 
 @HiltViewModel

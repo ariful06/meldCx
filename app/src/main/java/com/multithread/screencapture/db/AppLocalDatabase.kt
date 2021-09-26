@@ -9,7 +9,6 @@ import com.multithread.screencapture.history.model.ImageDataModel
 
 @Database(
     entities = [ImageDataModel::class],
-
     version = 1,
     exportSchema = false
 )

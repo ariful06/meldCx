@@ -51,10 +51,6 @@ object PathUtils {
                     val type = split[0]
                     if ("image" == type) {
                         uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    } else if ("video" == type) {
-                        uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                    } else if ("audio" == type) {
-                        uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                     }
                     selection = "_id=?"
                     selectionArgs = arrayOf(split[1])

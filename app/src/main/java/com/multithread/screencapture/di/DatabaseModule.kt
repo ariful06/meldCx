@@ -1,13 +1,10 @@
 package com.multithread.screencapture.di
 
-import android.app.Application
 import android.content.Context
-import androidx.lifecycle.AndroidViewModel
 import com.multithread.screencapture.db.AppLocalDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -24,6 +21,6 @@ object DatabaseModule {
 
     @Singleton
     @Provides
-    fun provideDbTransactionDao(db: AppLocalDatabase) = db.getImageDao()
+    fun provideImageDao(db: AppLocalDatabase) = db.getImageDao()
 
 }
